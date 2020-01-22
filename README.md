@@ -5,7 +5,7 @@ This program accesses the SAP sailing analytics API and pulls gps data from a sp
 To run the program please use Pycharm. Open Pycharm and go to File -> Open. Select the priceBookUpdate-master folder.
 
 ## Configuration
-If you want to select a different race then the example you must do the following:
+No configuration is required to run, but if you want to select a different race then you must do the following:
 
 There are two global variables in the program that can be set to select a specific race. To find regatta and race names go to [sapsailing.com](https://www.sapsailing.com/gwt/Home.html), select an event, then click the regattas tab, select a regatta, click on Races/Tracking, scroll down and click tracking, and select replay. When the page loads go to the url and you will see sections that say "regattaName=" and "raceName=". Copy the text immediately following and before the next "&". Then replace all "+" with "%20".
 
