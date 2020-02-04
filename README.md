@@ -2,7 +2,7 @@
 This program accesses the SAP sailing analytics API and pulls gps data from a specified regatta and race. The data is then written to a CSV file with a format that matches the output of another device, and stored in the csv_files folder. There will be one CSV file for each competitor in the race.
 
 ## Getting Started
-To run the program please use Pycharm. Open Pycharm and go to File -> Open. Select the priceBookUpdate-master folder.
+To run the program please use Pycharm. Open Pycharm and go to File -> Open. Select the SAPtoCSV-master folder.
 
 ## Configuration
 No configuration is required to run, but if you want to select a different race then you must do the following:
