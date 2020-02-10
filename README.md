@@ -12,13 +12,17 @@ To use Pycharm:
 Open Pycharm and go to File -> Open. Select the SAPtoCSV-master folder.
 
 To use venv from command line:
+
 Open SAPtoCSV-master folder in terminal.
+
 Enter the following commands:
-```python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python main.py
-```
+
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    python main.py
+To exit venv enter `deactivate`
+
 
 ## Configuration
 No configuration is required to run, but if you want to select a different race then you must do the following:
