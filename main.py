@@ -1,16 +1,18 @@
 #  Neil Marcellini
-#  1/21/2020
-#  This code fetches gps data from SAP and creates csv files in truesail format
-# set parameters regatta_name and race_name before running
+#  2/9/2020
+#  This code fetches gps data from SAP and creates csv files for each race and each competitor in a regatta.
+#  .csv files are in truesail format
+# set parameters regatta_name before running
 
 import json
 import requests
 import csv
 import time
 import os
+import datetime
+import urllib.parse
 
 regatta_name = "49erFX%20Worlds%202019"
-race_name = "F13%20Gold%20(49erFX)"
 
 csv_headers = ["RowCount", "TimeStamp", "Year", "Month", "Day", "Hour", "Minute", "Second", "Longitude [Deg E]",
                "Latitude [Deg N]", "SOG [knots]", "COG [Deg]", "Pitch [Deg]", "PitchTarget [Deg]", "Heel [Deg]",
@@ -19,29 +21,33 @@ csv_headers = ["RowCount", "TimeStamp", "Year", "Month", "Day", "Hour", "Minute"
 
 def main():
     start = time.time()
-    gps_url = "http://www.sapsailing.com/sailingserver/api/v1/regattas/" + \
-              regatta_name + "/races/" + race_name + "/competitors/positions"
-    #print(gps_url)
-    # get json file
-    request = requests.get(gps_url)
-    request_text = request.text
-    gps_data = json.loads(request_text)
+    race_names = getAllRaces()
+    for race_name in race_names:
+        dirname = urllib.parse.unquote(race_name)
+        dirname = dirname.replace(' ', '-')
+        os.mkdir(os.path.join(os.getcwd(), "csv_files", dirname))
+        gps_url = "http://www.sapsailing.com/sailingserver/api/v1/regattas/" + \
+                  regatta_name + "/races/" + race_name + "/competitors/positions"
+        #print(gps_url)
+        # get json file
+        request = requests.get(gps_url)
+        request_text = request.text
+        gps_data = json.loads(request_text)
 
-    competitors = gps_data['competitors']
-    for comp in competitors:
-        makeCSVTrack(comp)
+        competitors = gps_data['competitors']
+        for comp in competitors:
+            makeCSVTrack(comp, dirname)
     print("Completed in %.2f seconds" % (time.time() - start))
 
 
 # makes a csv file for each competitor
-def makeCSVTrack(competitor):
+def makeCSVTrack(competitor, dirname):
     file_name = competitor['name'] + ".csv"
     # replace any slashes in the name
     file_name = file_name.replace('/', '-')
     track = competitor['track']
     # now we will open a file for writing
-    csv_file = open(getDirectoryPath() + "/" + file_name, 'w')
-
+    csv_file = open(os.getcwd() + "/" + "csv_files" + "/" + dirname + "/" + file_name, 'w')
     # make a csv writer that uses dictionaries
     writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
     writer.writeheader()
@@ -52,7 +58,16 @@ def makeCSVTrack(competitor):
     for point in track:
         # update values
         row['RowCount'] += 1
-        row['TimeStamp'] = point['timepoint-ms']
+        timestamp = point['timepoint-ms'] / 1000  # divide by 1000 to get rid of trailing 0s
+        row['TimeStamp'] = timestamp
+        # Gives you the date and time in UTC
+        d = datetime.datetime.utcfromtimestamp(int(timestamp))
+        row['Year'] = d.year
+        row['Month'] = d.month
+        row['Day'] = d.day
+        row['Hour'] = d.hour
+        row['Minute'] = d.minute
+        row['Second'] = d.second
         # need to check if these coordinates need conversion
         row['Longitude [Deg E]'] = point['lng-deg']
         row['Latitude [Deg N]'] = point['lat-deg']
@@ -63,11 +78,17 @@ def makeCSVTrack(competitor):
     #close the file
     csv_file.close()
 
-# returns the path of csv_files directory
-def getDirectoryPath():
-    for root, dirs, files in os.walk("."):
-        for dir in dirs:
-            if "csv_files" in dir:
-                return os.path.join(root, dir)
+
+def getAllRaces():
+    races_url = "http://www.sapsailing.com/sailingserver/api/v1/regattas/" + \
+              regatta_name + "/races/"
+    # get json file
+    request = requests.get(races_url)
+    request_text = request.text
+    races_data = json.loads(request_text)
+    race_list = races_data['races']
+    race_names = [urllib.parse.quote(race['name']) for race in race_list]
+    return race_names
+
 
 main()
