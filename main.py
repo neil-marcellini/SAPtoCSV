@@ -2,7 +2,7 @@
 #  2/9/2020
 #  This code fetches gps data from SAP and creates csv files for each race and each competitor in a regatta.
 #  .csv files are in truesail format
-# set parameters regatta_name before running
+# set parameters regatta_id before running
 
 import json
 import requests
@@ -12,23 +12,36 @@ import os
 import datetime
 import urllib.parse
 
-regatta_name = "49erFX%20Worlds%202019"
+
+regatta_url = "https://49erworlds2020.sapsailing.com/gwt/Home.html#/" \
+              "regatta/races/:eventId=ee70229c-9836-4025-9096-1b5050152b1e&regattaId=49erFX%20Worlds%202020"
+base_url = ""
+regatta_id = ""
 
 csv_headers = ["RowCount", "TimeStamp", "Year", "Month", "Day", "Hour", "Minute", "Second", "Longitude [Deg E]",
                "Latitude [Deg N]", "SOG [knots]", "COG [Deg]", "Pitch [Deg]", "PitchTarget [Deg]", "Heel [Deg]",
                "HeelTarget [Deg]", "HeelRange [Deg]", "ClewLoad [0.1kg]", "Rudder [Deg]", "VMG [k]",
                "TWD [Deg]", "TWS [k]"]
 
+def parseURL():
+    global base_url
+    global regatta_id
+    base_url = regatta_url.split("sapsailing.com")[0] + "sapsailing.com/sailingserver/api/v1/regattas/"
+    # print(base_url)
+    regatta_id = regatta_url.split("regattaId=")[1]
+    # print(regatta_id)
+
+
 def main():
     start = time.time()
+    parseURL()
     race_names = getAllRaces()
     for race_name in race_names:
         dirname = urllib.parse.unquote(race_name)
         dirname = dirname.replace(' ', '-')
         os.mkdir(os.path.join(os.getcwd(), "csv_files", dirname))
-        gps_url = "http://www.sapsailing.com/sailingserver/api/v1/regattas/" + \
-                  regatta_name + "/races/" + race_name + "/competitors/positions"
-        #print(gps_url)
+        gps_url = base_url + regatta_id + "/races/" + race_name + "/competitors/positions"
+        # print(gps_url)
         # get json file
         request = requests.get(gps_url)
         request_text = request.text
@@ -80,8 +93,8 @@ def makeCSVTrack(competitor, dirname):
 
 
 def getAllRaces():
-    races_url = "http://www.sapsailing.com/sailingserver/api/v1/regattas/" + \
-              regatta_name + "/races/"
+    races_url = base_url + regatta_id + "/races/"
+    # print(races_url)
     # get json file
     request = requests.get(races_url)
     request_text = request.text
