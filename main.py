@@ -36,20 +36,23 @@ def main():
     start = time.time()
     parseURL()
     race_names = getAllRaces()
+    dir_names = next(os.walk('./csv_files'))[1]
     for race_name in race_names:
         dirname = urllib.parse.unquote(race_name)
         dirname = dirname.replace(' ', '-')
-        os.mkdir(os.path.join(os.getcwd(), "csv_files", dirname))
-        gps_url = base_url + regatta_id + "/races/" + race_name + "/competitors/positions"
-        # print(gps_url)
-        # get json file
-        request = requests.get(gps_url)
-        request_text = request.text
-        gps_data = json.loads(request_text)
+        # if we haven't already gotten csv files for this race
+        if dirname not in dir_names:
+            os.mkdir(os.path.join(os.getcwd(), "csv_files", dirname))
+            gps_url = base_url + regatta_id + "/races/" + race_name + "/competitors/positions"
+            # print(gps_url)
+            # get json file
+            request = requests.get(gps_url)
+            request_text = request.text
+            gps_data = json.loads(request_text)
 
-        competitors = gps_data['competitors']
-        for comp in competitors:
-            makeCSVTrack(comp, dirname)
+            competitors = gps_data['competitors']
+            for comp in competitors:
+                makeCSVTrack(comp, dirname)
     print("Completed in %.2f seconds" % (time.time() - start))
 
 
