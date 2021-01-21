@@ -1,4 +1,6 @@
 # SAPtoCSV
+*** Unfortunately, SAP no longer offers permission to access GPS data from their API ***
+
 This program accesses the SAP sailing analytics API and pulls gps data from all races of a specified regatta. The data is then written to a CSV file with a format that matches the output of another device, and stored in the csv_files folder, with subfolders for each race. There will be one CSV file for each competitor in a race.
 
 ## Prerequisites
